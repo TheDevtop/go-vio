@@ -13,3 +13,6 @@ type RemoveFunc func(string) error
 
 // Virtual function for os.Mkdir/os.MkdirAll
 type DirFunc func(string, fs.FileMode) error
+
+// Virtual function for os.Stat
+type StatFunc func(string) (fs.FileInfo, error)

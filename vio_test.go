@@ -3,7 +3,9 @@ package vio
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"testing"
+	"time"
 )
 
 // Virtual read function
@@ -25,6 +27,12 @@ func vRemove(path string) error {
 // Virtual make directory function
 func vMkDir(path string, perm fs.FileMode) error {
 	return nil
+}
+
+// Virtual stat function
+func vStat(path string) (fs.FileInfo, error) {
+	vvfi := MakeVirtualFileInfo(path, 0, 0664, time.Now(), false, nil)
+	return vvfi, nil
 }
 
 func Test_ReadFunc(t *testing.T) {
@@ -98,6 +106,26 @@ func Test_DirFunc(t *testing.T) {
 
 	// Assertion
 	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_StatFunc(t *testing.T) {
+	// Preparation
+	var (
+		path    = "/tmp/data"
+		getStat = func(fn StatFunc) (os.FileInfo, error) {
+			return fn(path)
+		}
+		fi  os.FileInfo
+		err error
+	)
+
+	// Execution
+	fi, err = getStat(vStat) // Can be replaced with os.Stat for comparison
+
+	// Assertion
+	if err != nil || fi.Name() != path {
 		t.Fatal(err)
 	}
 }
